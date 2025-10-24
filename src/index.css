@@ -1,0 +1,12 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --sage: #7BB07F;
+  --deep: #497957;
+  --beige: #F9F7F2;
+  --anthra: #3F3F3F;
+}
+
+body { background: #fafafa; color: var(--anthra); }
