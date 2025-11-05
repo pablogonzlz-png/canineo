@@ -1,295 +1,328 @@
-import React, { useState } from 'react'
+import React, { useEffect } from "react";
+import { BrowserRouter as Router, Routes, Route, NavLink } from "react-router-dom";
 
-export default function App() {
-  const [lang, setLang] = useState('FR') // FR first, EN after
-  const [mobileOpen, setMobileOpen] = useState(false)
-  const t = (fr, en) => (lang === 'FR' ? fr : en)
+const THEME = { brand: "#1f7a5b", brandDark: "#165c45", brandLight: "#e8f5ef", accent: "#f59e0b" };
+const ASSETS = { hero: "/assets/hero.jpg", constance: "/assets/constance.jpg", marc: "/assets/marc.jpg" };
 
-  const navItems = [
-    { id: 'home', fr: 'Accueil', en: 'Home' },
-    { id: 'about', fr: 'À propos', en: 'About' },
-    { id: 'services', fr: 'Services', en: 'Services' },
-    { id: 'process', fr: 'Parcours', en: 'Process' },
-    { id: 'faq', fr: 'FAQ', en: 'FAQ' },
-    { id: 'contact', fr: 'Contact', en: 'Contact' },
-  ]
+class ErrorBoundary extends React.Component {
+  constructor(props){ super(props); this.state = { hasError:false, error:null }; }
+  static getDerivedStateFromError(error){ return { hasError:true, error }; }
+  componentDidCatch(error, info){ console.error('Preview error:', error, info); }
+  render(){
+    if(this.state.hasError){
+      return (
+        <div className="p-4 m-4 border rounded-xl bg-red-50 text-red-800">
+          <h2 className="font-bold mb-1">Le preview a rencontré une erreur.</h2>
+          <p className="text-sm">{String(this.state.error)}</p>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
 
+function ApplyTheme(){
+  useEffect(()=>{
+    const r = document.documentElement;
+    r.style.setProperty("--brand", THEME.brand);
+    r.style.setProperty("--brand-dark", THEME.brandDark);
+    r.style.setProperty("--brand-light", THEME.brandLight);
+    r.style.setProperty("--accent", THEME.accent);
+    r.style.setProperty("--hero", `url(${ASSETS.hero})`);
+    r.style.setProperty("--constance", `url(${ASSETS.constance})`);
+    r.style.setProperty("--marc", `url(${ASSETS.marc})`);
+  },[]);
+  return null;
+}
+
+function Container({children}){ return <div className="px-6 md:px-12 lg:px-20">{children}</div>; }
+
+function Header(){
+  const base = "px-3 py-2 rounded hover:bg-green-100";
+  const active = "text-green-700 font-semibold";
   return (
-    <div className="w-full min-h-screen bg-gray-50 text-gray-800 font-sans scroll-smooth">
-      {/* Header */}
-      <header className="flex justify-between items-center px-4 md:px-8 py-4 border-b border-gray-300 bg-white sticky top-0 z-50 shadow-sm">
-        <div className="flex items-center gap-4">
-          <button
-            className="md:hidden inline-flex items-center justify-center h-10 w-10 rounded hover:bg-gray-100"
-            aria-label="Open menu"
-            onClick={() => setMobileOpen(v => !v)}
-          >
-            <div className="space-y-1.5">
-              <span className="block h-0.5 w-6 bg-gray-800"></span>
-              <span className="block h-0.5 w-6 bg-gray-800"></span>
-              <span className="block h-0.5 w-6 bg-gray-800"></span>
-            </div>
-          </button>
-          <h1 className="text-2xl md:text-3xl font-extrabold tracking-wide cursor-pointer hover:text-green-700 transition">
-            CANINEO
-          </h1>
+    <header className="bg-white shadow sticky top-0 z-10">
+      <Container>
+        <div className="p-4 flex justify-center items-center relative">
+          <NavLink to="/" className="font-extrabold text-2xl absolute left-0">CANINEO</NavLink>
+          <nav className="hidden md:flex gap-3 text-lg justify-center">
+            <NavLink to="/" end className={({isActive}) => `${base} ${isActive?active:''}`}>Accueil</NavLink>
+            <NavLink to="/apropos" className={({isActive}) => `${base} ${isActive?active:''}`}>À propos</NavLink>
+            <NavLink to="/services" className={({isActive}) => `${base} ${isActive?active:''}`}>Services</NavLink>
+            <NavLink to="/parcours" className={({isActive}) => `${base} ${isActive?active:''}`}>Parcours</NavLink>
+            <NavLink to="/contact" className={({isActive}) => `${base} ${isActive?active:''}`}>Contact</NavLink>
+          </nav>
         </div>
+      </Container>
+    </header>
+  );
+}
 
-        <nav className="hidden md:flex space-x-8 text-lg">
-          {navItems.map(item => (
-            <a
-              key={item.id}
-              href={`#${item.id}`}
-              className="hover:text-green-700 transition-colors duration-200"
-              onClick={() => setMobileOpen(false)}
-            >
-              {t(item.fr, item.en)}
-            </a>
+function Footer(){
+  return (
+    <footer className="bg-white border-t border-gray-300 py-8 mt-16 text-center text-gray-600">
+      <div className="space-x-4 text-sm">
+        <NavLink to="/mentions" className="underline">Mentions légales</NavLink>
+        <span>•</span>
+        <NavLink to="/contact" className="underline">Nous joindre</NavLink>
+      </div>
+      <p className="mt-2">© 2025 Canineo — Tous droits réservés.</p>
+    </footer>
+  );
+}
+
+function Accueil(){
+  return (
+    <main>
+      <section className="py-16" style={{background:"var(--brand-light)"}}>
+        <Container>
+          <div className="grid lg:grid-cols-2 gap-10 items-center">
+            <div>
+              <span className="inline-block text-xs uppercase tracking-wide" style={{background:"var(--brand-light)", color:"var(--brand-dark)", padding:"4px 8px", borderRadius:"6px"}}>Éducateurs canins — Montréal & Rive-Sud</span>
+              <h1 className="text-4xl md:text-5xl font-extrabold mt-3 mb-4">Renforcez le lien avec votre chien, une patte à la fois</h1>
+              <p className="text-gray-700 mb-6">Programmes personnalisés pour chiots, chiens réactifs et chiens d’assistance. Méthodes éthiques, objectifs mesurables, résultats durables.</p>
+              <div className="flex flex-wrap gap-3">
+                <NavLink to="/services" className="px-6 py-3 rounded-xl font-semibold" style={{background:"var(--brand)", color:"white"}}>Voir les services</NavLink>
+                <NavLink to="/contact" className="px-6 py-3 rounded-xl font-semibold" style={{border:"2px solid var(--brand)", color:"var(--brand-dark)"}}>Réserver une évaluation</NavLink>
+              </div>
+              <div className="flex gap-6 mt-6 text-sm text-gray-600">
+                <span className="flex items-center gap-2"><div className="h-5 w-5 rounded-full bg-gray-300"/> Méthodes positives</span>
+                <span className="flex items-center gap-2"><div className="h-5 w-5 rounded-full bg-gray-300"/> RDV à domicile</span>
+              </div>
+            </div>
+            <div className="h-72 md:h-96 rounded-3xl grid place-items-center text-gray-600 w-full" style={{backgroundImage:"var(--hero)", backgroundSize:"cover", backgroundPosition:"center", backgroundColor:"#e5e7eb"}}>
+              {/* /public/assets/hero.jpg */}
+            </div>
+          </div>
+        </Container>
+      </section>
+
+      <section className="py-14">
+        <Container>
+          <h2 className="text-2xl font-bold mb-6">Explorez nos sections</h2>
+          <div className="grid md:grid-cols-3 gap-6">
+            <NavLink to="/services" className="block bg-white border hover:shadow-lg transition rounded-2xl p-6 text-left">
+              <h3 className="text-xl font-semibold mb-1">Services</h3>
+              <p className="text-gray-600 mb-4">Chiots, réactivité, assistance et chiens de spécialité — découvrez nos forfaits et méthodes.</p>
+              <span className="inline-flex items-center font-medium" style={{color:"var(--brand)"}}>En savoir plus →</span>
+            </NavLink>
+            <NavLink to="/parcours" className="block bg-white border hover:shadow-lg transition rounded-2xl p-6 text-left">
+              <h3 className="text-xl font-semibold mb-1">Parcours</h3>
+              <p className="text-gray-600 mb-4">De l’évaluation aux commandes avancées : notre approche en 5 étapes.</p>
+              <span className="inline-flex items-center font-medium" style={{color:"var(--brand)"}}>En savoir plus →</span>
+            </NavLink>
+            <NavLink to="/apropos" className="block bg-white border hover:shadow-lg transition rounded-2xl p-6 text-left">
+              <h3 className="text-xl font-semibold mb-1">À propos</h3>
+              <p className="text-gray-600 mb-4">Rencontrez Constance Vale & Marc Kemp, co-fondateurs Canineo.</p>
+              <span className="inline-flex items-center font-medium" style={{color:"var(--brand)"}}>En savoir plus →</span>
+            </NavLink>
+          </div>
+        </Container>
+      </section>
+
+      <section className="py-14 bg-white">
+        <Container>
+          <div className="flex items-end justify-between mb-6">
+            <h2 className="text-2xl font-bold">Programmes populaires</h2>
+            <NavLink to="/services" className="font-medium" style={{color:"var(--brand)"}}>Tous les services →</NavLink>
+          </div>
+          <div className="grid md:grid-cols-3 gap-6">
+            {[{t:"Éducation du chiot (8–16 semaines)",p:"À partir de 120$ / séance"},{t:"Réactivité & marche en laisse",p:"Programme 4 séances"},{t:"Chiens de spécialité et assistance",p:"Bétail, renifleur, assistance, etc."}].map((s,i)=> (
+              <div key={i} className="border rounded-2xl p-6" style={{background:"var(--brand-light)", borderColor:"#d1d5db"}}>
+                <div className="h-16 w-16 rounded-full mb-3 grid place-items-center" style={{background:"var(--brand-light)"}}>
+                  <div className="h-8 w-8 bg-gray-300 rounded"/>
+                </div>
+                <h3 className="font-semibold">{s.t}</h3>
+                <p className="text-gray-600 text-sm mt-1">{s.p}</p>
+                <NavLink to="/services" className="inline-block mt-4 font-medium" style={{color:"var(--brand)"}}>Détails →</NavLink>
+              </div>
+            ))}
+          </div>
+        </Container>
+      </section>
+
+      <section className="py-14" style={{background:"var(--brand-light)"}}>
+        <Container>
+          <h2 className="text-2xl font-bold mb-6">Pourquoi choisir Canineo</h2>
+          <div className="grid md:grid-cols-4 gap-6">
+            <div className="bg-white border rounded-2xl p-6">
+              <div className="h-12 w-12 bg-gray-300 rounded mb-3"/>
+              <h3 className="font-semibold mb-1">Approche scientifique</h3>
+              <p className="text-sm text-gray-600">Nos méthodes reposent sur la science du comportement animal et le renforcement positif.</p>
+            </div>
+            <div className="bg-white border rounded-2xl p-6">
+              <div className="h-12 w-12 bg-gray-300 rounded mb-3"/>
+              <h3 className="font-semibold mb-1">Suivi structuré</h3>
+              <p className="text-sm text-gray-600">Chaque client reçoit un plan d’entraînement clair, des exercices hebdomadaires et un suivi documenté.</p>
+            </div>
+            <div className="bg-white border rounded-2xl p-6">
+              <div className="h-12 w-12 bg-gray-300 rounded mb-3"/>
+              <h3 className="font-semibold mb-1">Objectifs clairs</h3>
+              <p className="text-sm text-gray-600">Nous établissons ensemble des objectifs mesurables et atteignables adaptés à chaque chien.</p>
+            </div>
+            <div className="bg-white border rounded-2xl p-6">
+              <div className="h-12 w-12 bg-gray-300 rounded mb-3"/>
+              <h3 className="font-semibold mb-1">Résultats durables</h3>
+              <p className="text-sm text-gray-600">L’apprentissage est ancré dans la cohérence familiale et des routines stables pour des résultats à long terme.</p>
+            </div>
+          </div>
+        </Container>
+      </section>
+
+      <section className="py-14 bg-white">
+        <Container>
+          <div className="rounded-3xl p-8 md:p-12 flex flex-col md:flex-row items-center justify-between" style={{background:"var(--brand)", color:"white"}}>
+            <div className="mb-4 md:mb-0">
+              <h3 className="text-2xl font-bold">Prêt à commencer ?</h3>
+              <p className="opacity-90">Réservez une évaluation et recevez un plan clair dès la première rencontre.</p>
+            </div>
+            <NavLink to="/contact" className="px-6 py-3 rounded-xl font-semibold" style={{background:"white", color:"var(--brand)"}}>Réserver maintenant</NavLink>
+          </div>
+        </Container>
+      </section>
+    </main>
+  );
+}
+
+function Apropos(){
+  return (
+    <main className="py-12">
+      <Container>
+        <h1 className="text-3xl font-bold mb-10 text-center">À propos des co-fondateurs</h1>
+        <div className="grid md:grid-cols-2 gap-10 max-w-6xl mx-auto">
+          <div className="flex flex-col items-center text-center bg-white p-6 rounded-2xl shadow-sm border">
+            <div className="h-72 w-72 rounded-2xl mb-6 grid place-items-center text-gray-600 bg-gray-300 bg-cover bg-center" style={{backgroundImage:"var(--constance)"}}>[Portrait Constance Vale]</div>
+            <h2 className="text-2xl font-semibold mb-2">Constance Vale</h2>
+            <p className="text-gray-700 mb-2 font-medium">Co-fondatrice & Éducatrice canine</p>
+            <p className="text-gray-700 text-sm leading-relaxed">Constance possède plus de huit ans d’expérience auprès de chiens de toutes races et tempéraments. Passionnée par la compréhension du comportement animal, elle se spécialise dans l’éducation des chiots, la gestion de la réactivité et l’accompagnement des chiens d’assistance. Son approche repose sur la science du comportement, le respect et la cohérence familiale.</p>
+          </div>
+          <div className="flex flex-col items-center text-center bg-white p-6 rounded-2xl shadow-sm border">
+            <div className="h-72 w-72 rounded-2xl mb-6 grid place-items-center text-gray-600 bg-gray-300 bg-cover bg-center" style={{backgroundImage:"var(--marc)"}}>[Portrait Marc Kemp]</div>
+            <h2 className="text-2xl font-semibold mb-2">Marc Kemp</h2>
+            <p className="text-gray-700 mb-2 font-medium">Co-fondateur & Dresseur spécialisé</p>
+            <p className="text-gray-700 text-sm leading-relaxed">Marc est reconnu pour son expertise dans le dressage de chiens d’assistance et de chiens de bétail. Il se concentre sur la mise en place de routines adaptées au rôle du chien, que ce soit pour le travail ou l’aide au quotidien. Son approche repose sur la confiance mutuelle et la progression positive, assurant un apprentissage durable et respectueux pour le chien comme pour son maître.</p>
+          </div>
+        </div>
+      </Container>
+    </main>
+  );
+}
+
+function Services(){
+  const items = [
+    { title: "Éducation du chiot", desc: "Propreté, socialisation, rappel, bases d’obéissance.", price: "À partir de 120$ / séance" },
+    { title: "Réactivité & marche en laisse", desc: "Désensibilisation, gestion des déclencheurs, routines calmes.", price: "Programme 4 séances" },
+    { title: "Assistance", desc: "Accompagnement en obéissance et comportements liés au rôle d’assistance.", price: "Plan personnalisé — Voir l’encadré en bas de page pour l’accessibilité au programme." },
+    { title: "Chiens de spécialité", desc: "Chien de bétail, chien renifleur, chien de chasse, etc.", price: "Sur évaluation" },
+  ];
+  return (
+    <main className="py-12">
+      <Container>
+        <h1 className="text-3xl font-bold mb-10 text-center">Nos services</h1>
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {items.map((s,i)=>(
+            <div key={i} className="bg-white border rounded-2xl p-6">
+              <div className="h-12 w-12 rounded mb-3" style={{background:"var(--brand-light)"}}/>
+              <h3 className="font-semibold">{s.title}</h3>
+              <p className="text-sm text-gray-600 mt-1">{s.desc}</p>
+              {s.price && <p className="mt-3 text-gray-900 font-medium">{s.price}</p>}
+              <NavLink to="/contact" className="inline-block mt-3 font-semibold" style={{color:"var(--brand)"}}>Réserver →</NavLink>
+            </div>
           ))}
-        </nav>
-
-        <div className="flex items-center space-x-3 md:space-x-4">
-          <button onClick={() => setLang(lang === 'EN' ? 'FR' : 'EN')} className="border px-3 py-1 rounded hover:bg-gray-100 transition">
-            {lang === 'EN' ? 'FR' : 'EN'}
-          </button>
-          <a href="#contact" className="bg-green-600 text-white px-4 md:px-5 py-2 rounded hover:bg-green-700 transition">
-            {t('Réserver', 'Book a consultation')}
-          </a>
         </div>
-      </header>
+        <div className="border rounded-2xl p-6 mt-10" style={{background:"var(--brand-light)", borderColor:"#d1d5db"}}>
+          <h2 className="font-semibold mb-1">Forfaits sur mesure</h2>
+          <p className="text-gray-700 text-sm">Après l’évaluation, nous proposons un parcours adapté à votre binôme, avec objectifs clairs et indicateurs de progression.</p>
+        </div>
+        <div className="bg-white border rounded-2xl p-6 mt-6">
+          <h2 className="font-semibold mb-1">Programme Assistance — Informations importantes</h2>
+          <ul className="text-sm text-gray-700 list-disc list-inside">
+            <li>Attestation médicale obligatoire</li>
+            <li>Chiens de 5 ans et moins seulement</li>
+            <li>L’acceptation au programme est soumise à de nombreuses conditions</li>
+            <li>Tous les chiens ne sont pas admis</li>
+            <li>L’entraînement peut prendre jusqu’à 6 mois selon le chien, avec des rencontres hebdomadaires.</li>
+            <li>La réussite au programme ne peut être garantie, notamment si votre chien ne peut réussir le Test d’Accès Public.</li>
+          </ul>
+        </div>
+      </Container>
+    </main>
+  );
+}
 
-      {/* Mobile Drawer */}
-      {mobileOpen && (
-        <div className="fixed inset-0 z-50 md:hidden">
-          <div className="absolute inset-0 bg-black/40" onClick={() => setMobileOpen(false)} />
-          <div className="absolute left-0 top-0 h-full w-80 max-w-[85%] bg-white shadow-xl p-6 flex flex-col gap-6">
-            <div className="flex items-center justify-between">
-              <span className="text-xl font-bold">CANINEO</span>
-              <button aria-label="Close menu" className="h-10 w-10 grid place-items-center rounded hover:bg-gray-100" onClick={() => setMobileOpen(false)}>
-                <span className="sr-only">Close</span>
-                <div className="rotate-45 text-2xl leading-none">+</div>
-              </button>
+function Parcours(){
+  const steps = [
+    {t:"Évaluation", d:"Analyse du comportement, contexte familial, objectifs et priorités."},
+    {t:"Plan", d:"Programme personnalisé avec exercices hebdomadaires et matériel pédagogique."},
+    {t:"Séances", d:"Mises en situation, marche, rappels, gestion des déclencheurs."},
+    {t:"Suivi", d:"Ajustements, journal d’entraînement, consolidation des acquis."},
+    {t:"Commandes avancées & spécialités", d:"Approfondissement : obéissance avancée, spécialités (bétail, renifleur, etc.)."},
+  ];
+  return (
+    <main className="py-12">
+      <Container>
+        <h1 className="text-3xl font-bold mb-10 text-center">Notre parcours</h1>
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {steps.map((s,i)=>(
+            <div key={i} className="bg-white border rounded-2xl p-6">
+              <div className="font-extrabold text-2xl" style={{color:"var(--brand)"}}>{i+1}</div>
+              <h3 className="font-semibold mt-1">{s.t}</h3>
+              <p className="text-sm text-gray-600 mt-1">{s.d}</p>
             </div>
-            <div className="flex flex-col gap-4">
-              {navItems.map(item => (
-                <a key={item.id} href={`#${item.id}`} className="text-lg py-2 border-b border-gray-200" onClick={() => setMobileOpen(false)}>
-                  {t(item.fr, item.en)}
-                </a>
-              ))}
-            </div>
-            <div className="mt-auto flex items-center justify-between gap-3">
-              <button onClick={() => setLang(lang === 'EN' ? 'FR' : 'EN')} className="border px-3 py-1 rounded hover:bg-gray-100">
-                {lang === 'EN' ? 'FR' : 'EN'}
-              </button>
-              <a href="#contact" className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700" onClick={() => setMobileOpen(false)}>
-                {t('Réserver', 'Book')}
-              </a>
-            </div>
+          ))}
+        </div>
+        <div className="text-white rounded-2xl p-6 mt-10 flex items-center justify-between" style={{background:"var(--brand)"}}>
+          <p className="font-medium">Vous voulez démarrer par une évaluation ?</p>
+          <NavLink to="/contact" className="px-5 py-2 rounded-xl font-semibold" style={{background:"white", color:"var(--brand)"}}>Réserver</NavLink>
+        </div>
+      </Container>
+    </main>
+  );
+}
+
+function Contact(){
+  return (
+    <main className="py-12">
+      <Container>
+        <div className="grid lg:grid-cols-2 gap-8">
+          <form name="contact" method="POST" data-netlify="true" className="bg-white p-6 rounded-2xl border grid gap-3">
+            <input type="hidden" name="form-name" value="contact" />
+            <p className="text-sm text-gray-700 mb-2">Merci d’indiquer clairement les besoins de votre chien et le service que vous cherchez. Vous pouvez aussi nous envoyer photos et vidéos à notre adresse courriel. Nous vous contacterons par la suite.</p>
+            <input name="nom" placeholder="Nom complet" className="border p-2 rounded" />
+            <input name="telephone" placeholder="Numéro de téléphone" className="border p-2 rounded" />
+            <input name="email" placeholder="Email" className="border p-2 rounded" />
+            <textarea name="message" placeholder="Message" className="border p-2 rounded h-28" />
+            <button className="px-4 py-2 rounded" style={{background:"var(--brand)", color:"white"}}>Envoyer</button>
+          </form>
+          <div className="bg-white p-6 rounded-2xl border">
+            <h2 className="font-semibold mb-2">Informations</h2>
+            <ul className="text-gray-700 space-y-1">
+              <li><strong>Email :</strong> info@canineo.ca</li>
+              <li><strong>Zones :</strong> Montréal & Rive-Sud</li>
+            </ul>
+            <div className="h-56 rounded-xl mt-4 grid place-items-center text-gray-600 bg-gray-200">[Carte / zone d’intervention]</div>
           </div>
         </div>
-      )}
+      </Container>
+    </main>
+  );
+}
 
-      {/* HERO */}
-      <section id="home" className="flex flex-col items-center justify-center text-center py-28 bg-gradient-to-b from-green-50 to-white">
-        <div className="relative w-11/12 md:w-3/4 lg:w-1/2 h-96 bg-gray-300 flex items-center justify-center mb-6 rounded-2xl shadow-inner overflow-hidden">
-          <span className="text-gray-500 text-sm">[Dresseur·e + Labrador / Trainer + Labrador]</span>
-        </div>
-        <h2 className="text-4xl md:text-5xl font-bold mb-4 text-gray-900 leading-tight">
-          {t('Renforcez le lien avec votre chien, une patte à la fois', 'Building better bonds, one paw at a time')}
-        </h2>
-        <p className="text-lg text-gray-600 mb-8 max-w-xl">
-          {t('Dressage canin bilingue dans la grande région de Montréal.', 'Professional bilingual dog training across Greater Montréal.')}
-        </p>
-        <div className="space-x-4">
-          <a href="#contact" className="bg-green-700 text-white px-8 py-3 rounded-lg text-lg hover:bg-green-800 transition">
-            {t('Commencez', 'Start your training')}
-          </a>
-          <a href="#services" className="border border-green-700 text-green-700 px-8 py-3 rounded-lg text-lg hover:bg-green-50 transition">
-            {t('Voir les services', 'View services')}
-          </a>
-        </div>
-      </section>
-
-      {/* ABOUT */}
-      <section id="about" className="py-24 px-4 md:px-8 bg-white">
-        <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
-          <div className="h-72 bg-gray-300 rounded-2xl grid place-items-center text-sm text-gray-500">[Portrait Constance Vale]</div>
-          <div>
-            <h3 className="text-3xl font-bold mb-3">{t('À propos du dresseur', 'About the Trainer')}</h3>
-            <p className="text-gray-700 leading-relaxed mb-6">
-              {t(
-                'Chez Canineo, nous croyons qu’un chien épanoui commence par une relation solide avec son humain. Notre mission : vous aider à guider et comprendre votre compagnon par des méthodes positives, cohérentes et adaptées.',
-                'At Canineo, we believe a well-balanced dog begins with a strong bond between dog and human. Our mission is to help you guide and understand your companion through positive, consistent, and personalized methods.'
-              )}
-            </p>
-            <p className="text-gray-700 leading-relaxed mb-4">
-              <strong>Constance Vale</strong> — {t('fondatrice et éducatrice canine', 'Founder & Head Trainer')}. {t(
-                'Spécialiste du comportement canin : chiots, chiens réactifs/agressifs et chiens d’assistance.',
-                'Canine-behavior specialist: puppies, reactive/aggressive dogs, and service dogs.'
-              )}
-            </p>
-            <p className="text-gray-700 leading-relaxed">
-              {t(
-                'Nous intervenons à domicile et en milieu public dans la grande région de Montréal (Rive-Sud, Rive-Nord, Estrie).',
-                'We work in-home and in public settings across Greater Montréal (South Shore, North Shore, Estrie).'
-              )}
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* SERVICES */}
-      <section id="services" className="py-20 px-4 md:px-8 bg-white border-t border-gray-200">
-        <div className="max-w-6xl mx-auto">
-          <h3 className="text-3xl font-bold text-center mb-4">{t('Nos services', 'Our Services')}</h3>
-          <p className="text-center text-gray-600 max-w-3xl mx-auto mb-12">
-            {t(
-              'Des programmes conçus pour répondre aux besoins de votre chien : du chiot au chien d’assistance, en douceur et avec constance.',
-              'Programs designed to meet your dog’s needs — from puppies to service-dog preparation, with gentle consistency.'
-            )}
-          </p>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
-            {[
-              {
-                fr: { title: 'Dressage pour chiots', desc: 'Bases solides : socialisation, marche en laisse, propreté, obéissance de base.' },
-                en: { title: 'Puppy Training', desc: 'Strong foundations: socialization, leash manners, house training, basic obedience.' },
-                img: '[Puppy photo]',
-              },
-              {
-                fr: { title: 'Chiens agressifs ou réactifs', desc: 'Rééducation progressive, désensibilisation et construction de la confiance.' },
-                en: { title: 'Aggressive or Reactive Dogs', desc: 'Progressive rehabilitation, desensitization, and confidence building.' },
-                img: '[Calm dog photo]',
-              },
-              {
-                fr: { title: 'Chiens d’assistance', desc: 'Fiabilité et obéissance pour rôles d’assistance (mobilité, soutien émotionnel, thérapie).' },
-                en: { title: 'Service Dogs', desc: 'Obedience & reliability for assistance roles (mobility, PTSD/ES, therapy).' },
-                img: '[Service dog photo]',
-              },
-              {
-                fr: { title: 'Test d’accès public (PAT)', desc: 'Préparation et évaluation selon les standards reconnus du Public Access Test.' },
-                en: { title: 'Public Access Test (PAT)', desc: 'Preparation & evaluation per recognized Public Access Test standards.' },
-                img: '[Dog in public setting photo]',
-              },
-            ].map((service, i) => (
-              <div key={i} className="border border-gray-200 rounded-2xl p-8 flex flex-col items-center text-center bg-green-50 hover:shadow-md hover:-translate-y-1 transition-transform">
-                <div className="h-24 w-24 bg-gray-300 mb-6 rounded-full grid place-items-center text-xs text-gray-500">{service.img}</div>
-                <p className="text-xl font-semibold mb-2">{t(service.fr.title, service.en.title)}</p>
-                <p className="text-gray-600 text-sm mb-4">{t(service.fr.desc, service.en.desc)}</p>
-                <a href="#contact" className="text-green-700 font-medium hover:underline">{t('Réserver une évaluation →', 'Book an evaluation →')}</a>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* PROCESS */}
-      <section id="process" className="py-20 px-4 md:px-8 bg-green-50 border-t border-gray-200">
-        <div className="max-w-6xl mx-auto">
-          <h3 className="text-3xl font-bold text-center mb-4">{t('Notre parcours', 'Our Process')}</h3>
-          <p className="text-center text-gray-600 max-w-3xl mx-auto mb-12">
-            {t('Un chemin clair, transparent et progressif — avec des ajustements selon l’évolution de votre chien.', 'Transparent, structured, and adaptable — with adjustments based on your dog’s progress.')}
-          </p>
-
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-6 text-center">
-            {[
-              {
-                fr: { title: 'Évaluation', desc: 'Observation du comportement et de vos objectifs. Compte rendu inclus.' },
-                en: { title: 'Evaluation', desc: 'Observe behavior & goals. Written summary provided.' },
-                img: '[Evaluation]',
-              },
-              {
-                fr: { title: 'Plan', desc: 'Programme personnalisé : fréquence, objectifs, jalons, suivi.' },
-                en: { title: 'Plan', desc: 'Tailored program: frequency, milestones, follow-up.' },
-                img: '[Plan]',
-              },
-              {
-                fr: { title: 'Séances', desc: 'Obéissance, socialisation, marche en laisse, travail en public.' },
-                en: { title: 'Sessions', desc: 'Obedience, socialization, leash work, public exposure.' },
-                img: '[Sessions]',
-              },
-              {
-                fr: { title: 'Suivi', desc: 'Consolider les acquis, prévenir les rechutes, adapter le rythme.' },
-                en: { title: 'Follow‑up', desc: 'Consolidate progress, prevent setbacks, adapt pacing.' },
-                img: '[Follow-up]',
-              },
-              {
-                fr: { title: 'Test d’accès public', desc: 'Évaluation complète du duo maître‑chien en conditions réelles.' },
-                en: { title: 'Public Access Test', desc: 'Comprehensive team assessment in real public settings.' },
-                img: '[PAT]',
-              },
-            ].map((s, i) => (
-              <div key={i} className="p-6 border border-gray-200 rounded-2xl bg-white hover:shadow-md">
-                <div className="h-14 w-14 bg-gray-300 rounded-full mx-auto mb-4 grid place-items-center text-xs text-gray-500">{s.img}</div>
-                <p className="font-semibold text-lg mb-1">{t(s.fr.title, s.en.title)}</p>
-                <p className="text-gray-600 text-sm">{t(s.fr.desc, s.en.desc)}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* FAQ */}
-      <section id="faq" className="py-20 px-4 md:px-8 bg-white border-t border-gray-200">
-        <div className="max-w-5xl mx-auto">
-          <h3 className="text-3xl font-bold text-center mb-10">FAQ</h3>
-          <div className="space-y-6">
-            {[
-              { frQ: 'Quelle est la durée d’une séance ?', frA: 'Environ 60 minutes, selon le rythme du chien.', enQ: 'How long is each session?', enA: 'About 60 minutes, depending on your dog’s pace.' },
-              { frQ: 'Proposez-vous des forfaits ?', frA: 'Oui : évaluation seule, plan 5 séances, ou programme complet avec Test d’accès.', enQ: 'Do you offer packages?', enA: 'Yes: single evaluation, 5-session plan, or full program with Public Access Test.' },
-              { frQ: 'Travaillez-vous avec toutes les races ?', frA: 'Absolument — les méthodes s’adaptent à chaque tempérament.', enQ: 'Do you train all breeds?', enA: 'Absolutely — our methods adapt to every temperament.' },
-              { frQ: 'Vous déplacez‑vous ?', frA: 'Oui, à domicile ou en lieu public selon le programme.', enQ: 'Do you travel?', enA: 'Yes, in‑home or public‑space sessions depending on the program.' },
-              { frQ: 'Utilisez‑vous des punitions ?', frA: 'Non. Renforcement positif et gestion du comportement uniquement.', enQ: 'Do you use punitive methods?', enA: 'No. We use positive reinforcement and behavior management only.' },
-            ].map((qa, i) => (
-              <details key={i} className="group border border-gray-200 rounded-xl p-4">
-                <summary className="cursor-pointer flex items-center justify-between">
-                  <span className="font-medium">{t(qa.frQ, qa.enQ)}</span>
-                  <span className="text-xl leading-none group-open:rotate-45 transition">+</span>
-                </summary>
-                <p className="mt-3 text-gray-600">{t(qa.frA, qa.enA)}</p>
-              </details>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* CONTACT with Netlify Forms */}
-      <section id="contact" className="py-24 bg-green-50 px-4 md:px-8 border-t border-gray-200">
-        <div className="max-w-5xl mx-auto">
-          <h3 className="text-3xl font-bold text-center mb-6">{t('Contact', 'Get in touch')}</h3>
-          <p className="text-center text-gray-600 max-w-2xl mx-auto mb-10">
-            {t('Discutons des besoins de votre chien. Remplissez le formulaire ou écrivez‑nous directement.', 'Let’s talk about your dog’s goals. Fill out the form or contact us directly.')}
-          </p>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <form name="contact" method="POST" data-netlify="true" netlify-honeypot="bot-field" className="bg-white border border-gray-200 rounded-xl p-6 grid gap-4">
-              <input type="hidden" name="form-name" value="contact" />
-              <p className="hidden">
-                <label>Don’t fill this out: <input name="bot-field" /></label>
-              </p>
-              <input className="border rounded px-3 py-2" name="name" placeholder={t('Nom complet', 'Full name')} required />
-              <input className="border rounded px-3 py-2" name="email" type="email" placeholder="Email" required />
-              <input className="border rounded px-3 py-2" name="phone" placeholder={t('Téléphone', 'Phone')} />
-              <input className="border rounded px-3 py-2" name="dog" placeholder={t('Nom et âge du chien', 'Dog’s name & age')} />
-              <input className="border rounded px-3 py-2" name="service" placeholder={t('Service recherché', 'Service of interest')} />
-              <textarea className="border rounded px-3 py-2 h-28" name="message" placeholder={t('Message', 'Message')} />
-              <button className="bg-green-700 text-white px-5 py-2 rounded hover:bg-green-800 w-max" type="submit">{t('Envoyer', 'Send')}</button>
-            </form>
-            <div className="bg-white border border-gray-200 rounded-xl p-6">
-              <p className="mb-2"><strong>Email:</strong> info@canineo.ca</p>
-              <p className="mb-2"><strong>{t('Téléphone', 'Phone')}:</strong> (514) 000-0000</p>
-              <p className="mb-2"><strong>{t('Région', 'Region')}:</strong> {t('Montréal, Rive‑Sud, Rive‑Nord, Estrie', 'Greater Montréal, South & North Shore, Estrie')}</p>
-              <div className="h-40 mt-4 bg-gray-100 rounded grid place-items-center text-gray-500 text-sm">[Map placeholder]</div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* FOOTER */}
-      <footer className="bg-white border-t border-gray-300 py-8 text-center text-sm text-gray-500">
-        <p>© 2025 Canineo. {t('Tous droits réservés.', 'All rights reserved.')}</p>
-        <p>info@canineo.ca | (514) 000-0000</p>
-      </footer>
-    </div>
-  )
+export default function App(){
+  return (
+    <ErrorBoundary>
+      <Router>
+        <ApplyTheme />
+        <Header />
+        <Routes>
+          <Route path="/" element={<Accueil />} />
+          <Route path="/apropos" element={<Apropos />} />
+          <Route path="/services" element={<Services />} />
+          <Route path="/parcours" element={<Parcours />} />
+          <Route path="/contact" element={<Contact />} />
+        </Routes>
+        <Footer />
+      </Router>
+    </ErrorBoundary>
+  );
 }
